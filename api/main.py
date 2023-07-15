@@ -1,17 +1,30 @@
-# save this as app.py
-from flask import Flask
+import os
+import requests
+from flask import Flask, request
+from dotenv import load_dotenv
+
+load_dotenv(dotenv_path="./.env.local")
+UNSPLASH_API = "https://api.unsplash.com/photos/random"
+UNSPLASH_KEY = os.environ.get("UNSPLASH_KEY", "")
+
+if not UNSPLASH_KEY:
+    raise EnvironmentError("Unsplash key is missing...")
 
 app = Flask(__name__)
 
 
-@app.route("/")
-def hello():
-    return "Hello, World aaa!"
-
-
-@app.route("/test")
-def test1():
-    return "test12345"
+@app.route("/new-image")
+def new_image():
+    word = request.args.get("query")
+    headers = {
+        "Accept-Version": "v1",
+        "Authorization": "Client-ID " + UNSPLASH_KEY
+    }
+    params = {"query": word}
+    response = requests.get(url=UNSPLASH_API, headers=headers, params=params)
+    
+    data = response.json()
+    return {"data": data}
 
 
 if __name__ == '__main__':
